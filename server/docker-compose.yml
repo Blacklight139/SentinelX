@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  sentinelx-server:
+    build: .
+    container_name: sentinelx-server
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+      - "9090:9090"
+    volumes:
+      - sentinelx_data:/var/lib/sentinelx
+      - sentinelx_logs:/var/log/sentinelx
+      - ./config.yaml:/app/config.yaml:ro
+      - ./keys:/app/keys:ro
+    environment:
+      - TZ=Asia/Shanghai
+      - LOG_LEVEL=info
+      - MAX_CLIENTS=100
+    networks:
+      - sentinelx-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "https://localhost:8443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  sentinelx-redis:
+    image: redis:7-alpine
+    container_name: sentinelx-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-sentinelx123}
+    volumes:
+      - redis_data:/data
+    networks:
+      - sentinelx-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  sentinelx-monitor:
+    image: grafana/grafana:latest
+    container_name: sentinelx-monitor
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    networks:
+      - sentinelx-network
+    depends_on:
+      - sentinelx-server
+
+volumes:
+  sentinelx_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
+  sentinelx_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./redis_data
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./grafana_data
+
+networks:
+  sentinelx-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

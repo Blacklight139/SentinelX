@@ -1,0 +1,40 @@
+server:
+  address: "0.0.0.0:8443"
+  log_dir: "/var/lib/sentinelx/meg"
+  data_dir: "/var/lib/sentinelx/data"
+  max_clients: 100
+
+security:
+  rsa_key_size: 2048
+  session_timeout: 3600
+  max_login_attempts: 5
+
+logging:
+  level: "info"
+  rotation_size: 100
+  retention_days: 30
+
+monitoring:
+  enable_metrics: true
+  metrics_port: 9090
+
+frp_monitoring:
+  enabled: true
+  monitor_ports:
+    - 7000
+    - 7001
+    - 8080
+  detection_rules:
+    - name: "domain_hijacking"
+      pattern: "Host:.*malicious"
+      severity: "high"
+    - name: "traffic_redirection"
+      pattern: "Location:.*unauthorized"
+      severity: "medium"
+
+clients:
+  allowed_ips:
+    - "192.168.1.0/24"
+    - "10.0.0.0/8"
+  require_auth: true
+  auth_timeout: 300
