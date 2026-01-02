@@ -18,7 +18,8 @@
 
 #### 方法一：使用安装脚本（推荐）
 ```bash
-wget https://raw.githubusercontent.com/Blacklight139/SentinelX/main/install.sh
+国外  wget https://raw.githubusercontent.com/Blacklight139/SentinelX/main/install.sh
+国内  curl -O https://gitee.com/dark-beam/SentinelX/blob/main/server/install.sh
 chmod +x install.sh
 sudo ./install.sh
 ```
