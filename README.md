@@ -450,7 +450,7 @@ services:
 
 ## 📄 许可证
 
-本项目基于 MIT 许可证发布 - 查看 [LICENSE](LICENSE) 文件了解详情。
+本项目基于 AGPL v3.0 许可证发布 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 🚨 免责声明
 
