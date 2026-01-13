@@ -6,6 +6,7 @@
 set -e
 
 echo "🚀 正在安装 SentinelX ..."
+echo "📦 仓库: https://gitee.com/dark-beam/SentinelX"
 
 # 检测系统是否有 curl
 if ! command -v curl >/dev/null 2>&1; then
@@ -23,7 +24,7 @@ if ! command -v curl >/dev/null 2>&1; then
 fi
 
 # 下载完整的安装脚本
-TEMP_SCRIPT="/tmp/sentinelx_installer_$$.sh"
+TEMP_SCRIPT="/tmp/sentinelx_installer.sh"
 
 echo "📥 下载安装程序..."
 if curl -fsSL "https://gitee.com/dark-beam/SentinelX/raw/main/online_install.sh" -o "$TEMP_SCRIPT"; then
