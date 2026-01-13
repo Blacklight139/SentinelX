@@ -1,143 +1,84 @@
 #!/bin/bash
-# SentinelX 在线安装脚本 - 修复版
-# 版本: v2.0.1
+# SentinelX 在线安装脚本
 
-set -e
+# ... 省略其他部分 ...
 
-# ==================== 配置 ====================
-REPO_SOURCE="https://gitee.com/dark-beam/SentinelX"
-GITHUB_SOURCE="https://github.com/Blacklight139/SentinelX"
-
-# 颜色输出
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
-
-# ==================== 主要安装函数 ====================
-clone_and_install() {
-    local temp_dir="/tmp/sentinelx_install_$$"
-    mkdir -p "$temp_dir"
-    cd "$temp_dir"
-    
-    log_info "克隆源代码仓库..."
-    
-    # 尝试从 Gitee 克隆
-    if git clone --depth 1 "$REPO_SOURCE.git" .; then
-        log_success "从 Gitee 克隆成功"
-    elif git clone --depth 1 "$GITHUB_SOURCE.git" .; then
-        log_success "从 GitHub 克隆成功"
-    else
-        log_error "克隆仓库失败，请检查网络连接"
-        exit 1
-    fi
-    
-    # 检查必要的文件
-    if [ ! -d "server" ]; then
-        log_error "仓库结构不正确，缺少 server 目录"
-        exit 1
-    fi
-    
-    cd server
-    
-    # 检查必要文件
-    REQUIRED_FILES=("main.go" "config.yaml.example" "generate_keys.sh")
-    for file in "${REQUIRED_FILES[@]}"; do
-        if [ ! -f "$file" ]; then
-            log_error "缺少必要文件: $file"
-            exit 1
-        fi
-    done
-    
-    # 运行服务端安装脚本
-    if [ -f "install.sh" ]; then
-        chmod +x install.sh
-        ./install.sh
-    else
-        log_error "缺少服务端安装脚本"
-        exit 1
-    fi
-    
-    # 清理
-    cd /
-    rm -rf "$temp_dir"
-}
-
-# ==================== 主函数 ====================
-main() {
-    echo ""
-    echo "╔══════════════════════════════════════════════════════════╗"
-    echo "║          SentinelX 在线安装程序 v2.0.1                  ║"
-    echo "║          仓库: https://gitee.com/dark-beam/SentinelX    ║"
-    echo "╚══════════════════════════════════════════════════════════╝"
-    echo ""
-    
-    # 检查 root 权限
-    if [ "$EUID" -ne 0 ]; then 
-        log_error "请使用 sudo 运行此脚本"
-        echo "使用方法: curl -sSL https://gitee.com/dark-beam/SentinelX/raw/main/install.sh | sudo bash"
-        exit 1
-    fi
-    
-    # 安装 Git（如果需要）
-    if ! command -v git &> /dev/null; then
-        log_info "安装 Git..."
-        if command -v apt-get &> /dev/null; then
-            apt-get update && apt-get install -y git
-        elif command -v yum &> /dev/null; then
-            yum install -y git
-        elif command -v dnf &> /dev/null; then
-            dnf install -y git
+check_go_version() {
+    if command -v go &> /dev/null; then
+        local go_version=$(go version | awk '{print $3}' | sed 's/go//')
+        local required_version="1.25.0"
+        
+        # 使用版本比较
+        if [ "$(printf '%s\n' "$required_version" "$go_version" | sort -V | head -n1)" = "$required_version" ]; then
+            log_success "Go 版本满足要求: $go_version"
+            return 0
         else
-            log_error "无法自动安装 Git，请手动安装"
-            exit 1
+            log_warning "Go 版本过低: $go_version (需要 >= $required_version)"
+            return 1
         fi
     fi
-    
-    # 克隆并安装
-    clone_and_install
-    
-    # 显示结果
-    show_result
+    return 1
 }
 
-show_result() {
-    local ip=$(hostname -I | awk '{print $1}' | head -n1)
+install_go_1_25() {
+    log_info "安装 Go 1.25.5..."
     
-    echo ""
-    echo "✅ SentinelX 安装完成！"
-    echo ""
-    echo "📋 安装信息:"
-    echo "   服务用户: sentinelx"
-    echo "   安装目录: /opt/sentinelx"
-    echo "   配置文件: /etc/sentinelx/config.yaml"
-    echo "   数据目录: /var/lib/sentinelx/meg"
-    echo "   日志目录: /var/log/sentinelx"
-    echo ""
-    echo "🌐 访问地址:"
-    echo "   Web界面: https://${ip:-localhost}:8443"
-    echo "   指标监控: http://${ip:-localhost}:9090/metrics"
-    echo ""
-    echo "🔧 管理命令:"
-    echo "   启动服务: systemctl start sentinelx-server"
-    echo "   停止服务: systemctl stop sentinelx-server"
-    echo "   查看状态: systemctl status sentinelx-server"
-    echo "   查看日志: journalctl -u sentinelx-server -f"
-    echo ""
-    echo "📚 文档: $REPO_SOURCE"
-    echo ""
-    echo "💡 下一步:"
-    echo "   1. 编辑配置文件: /etc/sentinelx/config.yaml"
-    echo "   2. 启动服务: systemctl start sentinelx-server"
-    echo "   3. 设置开机启动: systemctl enable sentinelx-server"
-    echo ""
+    local arch=$(uname -m)
+    case $arch in
+        x86_64) arch="amd64" ;;
+        aarch64) arch="arm64" ;;
+        armv7l) arch="armv6l" ;;
+        *) arch="amd64" ;;
+    esac
+    
+    local go_tar="go1.25.5.linux-$arch.tar.gz"
+    local go_url="https://go.dev/dl/$go_tar"
+    
+    # 下载 Go
+    cd /tmp
+    if ! curl -fsSL "$go_url" -o "$go_tar"; then
+        log_error "下载 Go 失败"
+        return 1
+    fi
+    
+    # 删除旧版本
+    if [ -d "/usr/local/go" ]; then
+        rm -rf /usr/local/go
+    fi
+    
+    # 安装新版本
+    tar -C /usr/local -xzf "$go_tar"
+    
+    # 设置环境变量
+    if ! grep -q "/usr/local/go/bin" ~/.bashrc; then
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+    fi
+    if ! grep -q "/usr/local/go/bin" /etc/profile; then
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
+    fi
+    
+    export PATH=$PATH:/usr/local/go/bin
+    source ~/.bashrc
+    
+    # 验证安装
+    if go version | grep -q "go1.25"; then
+        log_success "Go 1.25.5 安装成功"
+        return 0
+    else
+        log_error "Go 安装失败"
+        return 1
+    fi
 }
 
-# 执行主函数
-main "$@"
+# 在主函数中添加 Go 版本检查
+main() {
+    # ... 省略其他部分 ...
+    
+    # 检查 Go 版本
+    if ! check_go_version; then
+        log_info "安装或更新 Go 到 1.25.5..."
+        install_go_1_25
+    fi
+    
+    # ... 省略其他部分 ...
+}
