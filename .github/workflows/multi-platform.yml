@@ -1,0 +1,151 @@
+name: Multi-Platform Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: true
+        default: 'latest'
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+            target: linux
+          - os: ubuntu-latest
+            arch: arm64
+            target: linux
+          - os: ubuntu-latest
+            arch: arm
+            target: linux
+          - os: windows-latest
+            arch: amd64
+            target: windows
+          - os: macos-latest
+            arch: amd64
+            target: darwin
+          - os: macos-latest
+            arch: arm64
+            target: darwin
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+    
+    - name: Configure Go environment
+      run: |
+        go env -w GOPROXY=https://goproxy.cn,direct
+        go env -w GOSUMDB=sum.golang.google.cn
+    
+    - name: Build
+      working-directory: ./server
+      run: |
+        export GOOS=${{ matrix.target }}
+        export GOARCH=${{ matrix.arch }}
+        
+        BINARY_NAME="sentinelx-server"
+        if [ "$GOOS" = "windows" ]; then
+          BINARY_NAME="$BINARY_NAME.exe"
+        fi
+        
+        CGO_ENABLED=0 go build \
+          -ldflags="-s -w -X main.Version=${{ github.ref_name || inputs.version }}" \
+          -o "$BINARY_NAME" \
+          main.go
+        
+        # 为不同平台创建不同的包名
+        PACKAGE_NAME="sentinelx-server-${GOOS}-${GOARCH}"
+        mkdir -p "../release/${PACKAGE_NAME}"
+        mv "$BINARY_NAME" "../release/${PACKAGE_NAME}/"
+        
+        # 复制必要文件
+        cp config.yaml.example "../release/${PACKAGE_NAME}/"
+        cp generate_keys.sh "../release/${PACKAGE_NAME}/"
+        cp sentinelx-server.service "../release/${PACKAGE_NAME}/"
+        cp ../LICENSE "../release/${PACKAGE_NAME}/"
+        cp ../README.md "../release/${PACKAGE_NAME}/"
+        
+        # 创建安装脚本
+        cat > "../release/${PACKAGE_NAME}/install.sh" << 'EOF'
+#!/bin/bash
+# SentinelX Installer
+echo "Installing SentinelX..."
+# 具体安装逻辑
+EOF
+        chmod +x "../release/${PACKAGE_NAME}/install.sh"
+    
+    - name: Create archive
+      run: |
+        cd release
+        PACKAGE_NAME="sentinelx-server-${{ matrix.target }}-${{ matrix.arch }}"
+        
+        if [ "${{ matrix.target }}" = "windows" ]; then
+          7z a "${PACKAGE_NAME}.zip" "${PACKAGE_NAME}/"
+          echo "ARCHIVE_NAME=${PACKAGE_NAME}.zip" >> $GITHUB_ENV
+        else
+          tar -czf "${PACKAGE_NAME}.tar.gz" "${PACKAGE_NAME}/"
+          echo "ARCHIVE_NAME=${PACKAGE_NAME}.tar.gz" >> $GITHUB_ENV
+        fi
+        
+        echo "ARCHIVE_PATH=release/${ARCHIVE_NAME}" >> $GITHUB_ENV
+    
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARCHIVE_NAME }}
+        path: ${{ env.ARCHIVE_PATH }}
+        retention-days: 30
+        if-no-files-found: error
+  
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+    
+    - name: Combine and prepare release
+      run: |
+        mkdir -p release-files
+        # 移动所有下载的artifact
+        for file in *; do
+          if [ -f "$file" ]; then
+            mv "$file" release-files/
+          fi
+        done
+        
+        # 生成checksums
+        cd release-files
+        sha256sum * > checksums.txt
+        cd ..
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: release-files/*
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        make_latest: true

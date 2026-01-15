@@ -1,78 +1,202 @@
-name: Go
+name: Go CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, feature/* ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
   test:
+    name: Test and Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go-version: [1.25.x]
+        platform: [ubuntu-latest]
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 获取所有历史以便更好的版本信息
     
     - name: Set up Go ${{ matrix.go-version }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        cache: true
+        cache-dependency-path: server/go.sum
     
     - name: Verify Go version
       run: go version
     
     - name: Install dependencies
-      run: cd server && go mod download
+      working-directory: ./server
+      run: |
+        # 设置国内代理以提高下载速度
+        go env -w GOPROXY=https://goproxy.cn,direct
+        go env -w GOSUMDB=sum.golang.google.cn
+        go mod download
     
     - name: Run tests
-      run: cd server && go test -v -race ./...
+      working-directory: ./server
+      run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
     
     - name: Run benchmarks
-      run: cd server && go test -bench=. -benchtime=1s ./...
+      working-directory: ./server
+      run: go test -bench=. -benchtime=1s ./...
     
     - name: Run vet
-      run: cd server && go vet ./...
+      working-directory: ./server
+      run: go vet ./...
     
-    - name: Run staticcheck
+    - name: Run static analysis
       uses: dominikh/staticcheck-action@v1
       with:
         version: "latest"
         install-go: false
+        working-directory: ./server
     
-    - name: Build
-      run: cd server && ./build.sh
+    - name: Build application
+      working-directory: ./server
+      run: |
+        # 使用构建脚本
+        chmod +x build.sh
+        ./build.sh
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: sentinelx-build
+        name: sentinelx-build-${{ github.run_id }}
         path: |
-          server/build/
-        retention-days: 7
-
-  release:
-    needs: test
+          server/build/**
+        retention-days: 30
+        include-hidden-files: true
+        if-no-files-found: error
+    
+    - name: Upload test coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-${{ github.run_id }}
+        path: server/coverage.out
+        retention-days: 30
+    
+    - name: Run security scan
+      uses: anchore/sbom-action@v0
+      with:
+        path: ./server
+    
+    - name: CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        languages: go
+  
+  quality:
+    name: Code Quality
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    if: always()
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: sentinelx-build-${{ github.run_id }}
+        path: artifacts
+    
+    - name: List build artifacts
+      run: ls -la artifacts/
+    
+    - name: Verify checksums
+      run: |
+        cd artifacts
+        if [ -f checksums.sha256 ]; then
+          sha256sum -c checksums.sha256
+        fi
+    
+    - name: Upload quality report
+      uses: actions/upload-artifact@v4
+      with:
+        name: quality-report-${{ github.run_id }}
+        path: artifacts/checksums.sha256
+        retention-days: 7
+  
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [test, quality]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.25.x
+        go-version: '1.25'
+        cache: true
     
-    - name: Build release
-      run: cd server && ./build.sh
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+    
+    - name: Combine artifacts
+      run: |
+        mkdir -p release-artifacts
+        # 移动所有下载的artifact到统一的目录
+        for dir in */; do
+          if [ -d "$dir" ] && [[ "$dir" != "release-artifacts/" ]]; then
+            cp -r "$dir"/* release-artifacts/ 2>/dev/null || true
+          fi
+        done
     
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
-        files: server/build/*
+        files: release-artifacts/*
         draft: false
         prerelease: false
         generate_release_notes: true
+        discussion_category_name: "Announcements"
+        make_latest: true
+    
+    - name: Deploy to Docker Hub (optional)
+      if: success()
+      uses: docker/setup-buildx-action@v3
+      # 这里可以添加 Docker 构建和推送步骤
+  
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [test, quality, release]
+    if: always()
+    
+    steps:
+    - name: Discord Notification on Failure
+      if: failure()
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        status: ${{ job.status }}
+        title: "SentinelX CI/CD Failed"
+        description: "Build #${{ github.run_number }} failed. Check the logs for details."
+        color: 0xFF0000
+        url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    
+    - name: Discord Notification on Success
+      if: success()
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        status: ${{ job.status }}
+        title: "SentinelX CI/CD Passed"
+        description: "Build #${{ github.run_number }} passed successfully!"
+        color: 0x00FF00
+        url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
