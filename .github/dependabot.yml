@@ -1,0 +1,219 @@
+# .github/dependabot.yml
+version: 2
+
+updates:
+  # 更新 Go 模块依赖
+  - package-ecosystem: "gomod"
+    directory: "/server"  # Go 模块的位置
+    schedule:
+      interval: "weekly"  # 每周检查
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "Blacklight139"  # 您的 GitHub 用户名
+    assignees:
+      - "Blacklight139"
+    labels:
+      - "dependencies"
+      - "security"
+      - "automated"
+    open-pull-requests-limit: 5
+    versioning-strategy: "increase"
+    ignore:
+      # 忽略特定依赖的更新
+      - dependency-name: "github.com/sirupsen/logrus"
+        versions: ["2.x", "3.x"]  # 保持 v1.x，因为 logrus v2+ 有 breaking changes
+      - dependency-name: "golang.org/x/crypto"
+        update-types: ["version-update:semver-major"]  # 忽略大版本更新，需要手动审查
+    
+  # 更新 GitHub Actions 依赖
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "Asia/Shanghai"
+    commit-message:
+      prefix: "chore(ci)"
+    reviewers:
+      - "Blacklight139"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    open-pull-requests-limit: 3
+    
+  # 更新 Docker 依赖（如果有 Dockerfile）
+  - package-ecosystem: "docker"
+    directory: "/server"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore(docker)"
+    reviewers:
+      - "Blacklight139"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "security"
+  
+  # 更新 npm 依赖（如果未来有前端部分）
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(client)"
+    reviewers:
+      - "Blacklight139"
+    labels:
+      - "dependencies"
+      - "client"
+      - "automated"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  
+  # 安全更新配置
+  security-updates:
+    enable: true
+    commit-message:
+      prefix: "security"
+    labels:
+      - "security"
+      - "critical"
+    reviewers:
+      - "Blacklight139"
+    assignees:
+      - "Blacklight139"
+
+# 依赖分组配置（将相关依赖一起更新）
+groups:
+  # Go 依赖分组
+  go-dependencies:
+    patterns:
+      - "*"
+    update-types:
+      - "minor"
+      - "patch"
+  
+  # Go 安全依赖分组（安全补丁）
+  go-security:
+    patterns:
+      - "golang.org/x/*"
+      - "github.com/golang/*"
+    applies-to: "security-updates"
+  
+  # Web 框架分组
+  web-frameworks:
+    patterns:
+      - "github.com/gorilla/*"
+      - "github.com/gin-gonic/*"
+    update-types:
+      - "minor"
+      - "patch"
+
+# 漏洞警报配置
+vulnerability-alerts:
+  enable: true
+  security-advisories:
+    enabled: true
+    filters:
+      severity: ["critical", "high", "moderate"]
+  
+  # 自动创建修复 PR
+  auto-dismissed-ranges:
+    - ecosystem: "gomod"
+      dismiss: "in_range"
+    - ecosystem: "github-actions"
+      dismiss: "in_range"
+  
+  # 通知设置
+  notifications:
+    email:
+      enabled: true
+      recipients:
+        - "security@example.com"  # 替换为您的安全邮箱
+    slack:
+      enabled: false
+      webhook: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+
+# 依赖忽略规则
+ignore-rules:
+  # 忽略特定版本范围的更新
+  - match:
+      dependency-name: "github.com/prometheus/client_golang"
+      version-requirement: ">= 2.0.0"
+    reason: "等待 v2 API 稳定"
+  
+  # 忽略测试依赖的次要更新
+  - match:
+      dependency-type: "development"
+      update-types: ["version-update:semver-minor"]
+    reason: "仅自动更新补丁版本"
+
+# 合规性配置
+compliance:
+  # 许可证合规性检查
+  licenses:
+    allowed:
+      - "MIT"
+      - "Apache-2.0"
+      - "BSD-3-Clause"
+      - "BSD-2-Clause"
+      - "ISC"
+    denied:
+      - "GPL-3.0"
+      - "AGPL-3.0"
+  
+  # 依赖来源限制
+  origins:
+    allowed:
+      - "github.com"
+      - "golang.org"
+      - "gopkg.in"
+    denied:
+      - "example.com"  # 示例：限制某些来源
+
+# 性能优化
+performance:
+  # 限制并发更新数量
+  max-concurrent-updates: 3
+  
+  # 依赖解析超时
+  timeout-minutes: 10
+  
+  # 内存限制
+  memory-limit-mb: 1024
+
+# 报告配置
+reporting:
+  # 依赖更新报告
+  summary:
+    enabled: true
+    format: "markdown"
+    channels:
+      - "pull-request"
+      - "workflow-summary"
+  
+  # 安全报告
+  security:
+    enabled: true
+    channels:
+      - "email"
+      - "github-alerts"
+
+# 备份配置
+backup:
+  # 在更新前创建备份分支
+  create-backup-branch: true
+  backup-branch-prefix: "dependabot/backup/"
+  
+  # 自动清理旧的备份分支
+  cleanup-backup-branches: true
+  backup-retention-days: 7

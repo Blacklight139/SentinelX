@@ -1,0 +1,180 @@
+# .github/CODEOWNERS
+
+# 全局默认所有者（整个项目）
+*                       @Blacklight139
+
+# 核心服务端代码
+/server/**/*.go         @Blacklight139
+/server/go.mod          @Blacklight139
+/server/go.sum          @Blacklight139
+/server/main.go         @Blacklight139
+
+# 配置文件
+/server/config.yaml.example     @Blacklight139
+/server/sentinelx-server.service @Blacklight139
+/server/Dockerfile              @Blacklight139
+/server/docker-compose.yml      @Blacklight139
+
+# 构建脚本
+/server/build.sh                @Blacklight139
+/server/generate_keys.sh        @Blacklight139
+/server/install.sh              @Blacklight139
+/server/setup.sh                @Blacklight139
+
+# 测试文件
+/server/*_test.go               @Blacklight139
+/tests/**/*                     @Blacklight139
+
+# 文档文件
+/docs/**/*                      @Blacklight139
+README.md                       @Blacklight139
+CHANGELOG.md                    @Blacklight139
+CONTRIBUTING.md                 @Blacklight139
+SECURITY.md                     @Blacklight139
+
+# CI/CD 配置文件
+.github/workflows/**/*          @Blacklight139
+.github/dependabot.yml          @Blacklight139
+.github/CODEOWNERS              @Blacklight139
+.github/PULL_REQUEST_TEMPLATE/**/* @Blacklight139
+.github/ISSUE_TEMPLATE/**/*     @Blacklight139
+
+# 客户端代码（如果未来有）
+/client/**/*                    @Blacklight139
+
+# 脚本文件
+/scripts/**/*                   @Blacklight139
+
+# 许可证文件
+LICENSE                         @Blacklight139
+
+# 安全相关文件
+SECURITY.md                     @Blacklight139 
+/server/keys/**/*               @Blacklight139
+
+# 数据库相关文件（如果有）
+/migrations/**/*                @Blacklight139 
+
+# API 文档
+/docs/api/**/*                  @Blacklight139 
+
+# 特定文件的精确匹配
+/package.json                   @Blacklight139
+/tsconfig.json                  @Blacklight139
+
+# 目录级别的所有者
+/.github/                       @Blacklight139 
+/docker/                        @Blacklight139 
+/kubernetes/                    @Blacklight139 
+
+# 环境配置文件
+/.env.example                   @Blacklight139 
+/.env.production                @Blacklight139 
+
+# 根据文件类型指定所有者
+# Makefile
+**/Makefile                    @Blacklight139
+
+# Shell 脚本
+**/*.sh                        @Blacklight139
+
+# Docker 相关
+**/Dockerfile*                 @Blacklight139 
+**/docker-compose*.yml         @Blacklight139 
+**/.dockerignore               @Blacklight139 
+
+# 配置目录
+/config/**/*                   @Blacklight139 
+
+# 前端资源（如果未来有）
+/public/**/*                   @Blacklight139 
+/static/**/*                   @Blacklight139 
+/assets/**/*                   @Blacklight139 
+
+# 测试相关
+/coverage/**/*                 @Blacklight139
+/test-results/**/*             @Blacklight139
+
+# 排除某些文件（不需要所有者）
+.gitignore                     # 无所有者
+.editorconfig                  # 无所有者
+
+# 复杂模式示例
+# 所有 .go 文件除了测试文件
+*.go                           @Blacklight139
+!*_test.go                     # 测试文件有专门的规则
+
+# 所有 .md 文件除了 README.md
+*.md                           @Blacklight139
+!README.md                     # README.md 有专门的规则
+
+# 基于分支的保护规则
+# 主分支保护
+/main/**/*                     @Blacklight139 
+
+# 开发分支
+/develop/**/*                  @Blacklight139
+
+# 功能分支
+/feature/**/*                  @Blacklight139 
+
+# 修复分支
+/fix/**/*                      @Blacklight139
+
+# 发布分支
+/release/**/*                  @Blacklight139 
+
+# 热修复分支
+/hotfix/**/*                   @Blacklight139 
+
+# 特定环境的配置
+/config/production/**/*        @Blacklight139 
+/config/staging/**/*           @Blacklight139 
+/config/development/**/*       @Blacklight139 
+
+# 敏感文件保护
+**/*.key                       @Blacklight139 
+**/*.pem                       @Blacklight139
+**/*.crt                       @Blacklight139
+**/*.p12                       @Blacklight139
+**/secret*                     @Blacklight139 
+**/password*                   @Blacklight139 
+**/credential*                 @Blacklight139 
+**/token*                      @Blacklight139 
+
+# 日志文件（通常不需要所有者）
+**/*.log                       # 无所有者
+**/logs/**/*                   # 无所有者
+
+# 临时文件
+**/tmp/**/*                    # 无所有者
+**/temp/**/*                   # 无所有者
+
+# 构建产物
+**/dist/**/*                   # 无所有者
+**/build/**/*                  # 无所有者
+**/out/**/*                    # 无所有者
+**/target/**/*                 # 无所有者
+
+# 依赖目录
+**/node_modules/**/*           # 无所有者
+**/vendor/**/*                 # 无所有者
+
+# 注释说明
+# # 开头的行是注释
+# 路径模式是 glob 模式
+# 最后匹配的规则胜出
+
+# 团队引用（如果设置了团队）
+
+# 如果没有团队，只使用个人账号
+# 格式：路径模式 @用户名1 ...
+
+# 注意事项：
+# 1. CODEOWNERS 文件从上到下读取，最后匹配的规则胜出
+# 2. 可以使用 * 作为通配符
+# 3. ** 匹配任意层级的目录
+# 4. ! 用于排除
+# 5. 可以使用团队或用户名
+# 6. 文件路径是相对于仓库根目录
+# 7. 私密密钥文件为生成者所有，作者不具备查看能力
