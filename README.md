@@ -1,126 +1,83 @@
-# SentinelX - 安全流量监控与日志系统
+SentinelX - 安全流量监控与日志系统
 
-## 🌟 项目简介
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.25.5-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
+  <img src="https://img.shields.io/badge/License-AGPL%203.0-green?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/actions/workflow/status/Blacklight139/SentinelX/go.yml?style=for-the-badge&label=CI/CD" alt="CI/CD">
+  <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-blue?style=for-the-badge" alt="Platform">
+  <img src="https://img.shields.io/github/stars/Blacklight139/SentinelX?style=for-the-badge&logo=github" alt="GitHub Stars">
+  <img src="https://img.shields.io/gitee/stars/dark-beam/SentinelX?style=for-the-badge&logo=gitee" alt="Gitee Stars">
+</p><div align="center">
+  <h1>SentinelX - 企业级安全流量监控系统</h1>
+  <p>实时检测中间商恶意操控，保护您的FRP流量安全</p>English | 中文 | 文档
 
-**SentinelX** 是一个企业级的安全流量监控与日志记录系统，专门设计用于检测和记录中间商或者frpc使用者对FRP流量的恶意操控行为。系统采用端到端加密技术，确保日志数据的安全性和完整性。
+</div>📍 双仓库同步
 
-### 核心特性
-- 🔒 **端到端非对称加密** - 客户端与服务端之间使用RSA-2048加密通信
-- 📊 **实时流量监控** - 实时记录攻击域名、被攻击域名及流量计量
-- 🔐 **双重加密存储** - 主日志和访问日志分别使用不同的密钥加密
-- 🛡️ **一次性下载保护** - 访问日志只能下载一次，增强安全性
-- 🌐 **跨平台客户端** - 支持Windows、macOS、Linux的GUI客户端
-- 📈 **可视化监控** - 客户端实时查看加密日志统计信息
+本项目同时在 GitHub 和 Gitee 维护，您可以根据网络状况选择最合适的平台：
 
-## 🚀 快速安装
+平台 地址 推荐用户 特点
+🌍 GitHub https://github.com/Blacklight139/SentinelX 国际用户、海外用户 完整的CI/CD、自动发布、多平台构建
+🇨🇳 Gitee https://gitee.com/dark-beam/SentinelX 中国大陆用户 国内镜像、加速下载、中文社区
 
-### 方式一：一键在线安装（推荐）
+🚀 快速开始
+
+一键安装（推荐）
+
+中国大陆用户（使用 Gitee 镜像）
+
 ```bash
-# 使用 Gitee（国内推荐，速度更快）
 curl -sSL https://gitee.com/dark-beam/SentinelX/raw/main/install.sh | sudo bash
+```
 
-# 或使用 GitHub（国际用户）
+国际用户（使用 GitHub）
+
+```bash
 curl -sSL https://raw.githubusercontent.com/Blacklight139/SentinelX/main/install.sh | sudo bash
 ```
 
-### 方式二：完整在线安装脚本
+Docker 快速部署
+
 ```bash
-# 1. 下载完整安装脚本
-wget https://gitee.com/dark-beam/SentinelX/raw/main/online_install.sh
+# 使用 GitHub Docker Hub
+docker run -d \
+  --name sentinelx \
+  -p 8443:8443 \
+  -p 9090:9090 \
+  ghcr.io/blacklight139/sentinelx:latest
 
-# 2. 赋予执行权限
-chmod +x online_install.sh
-
-# 3. 执行安装（支持多种选项）
-sudo ./online_install.sh                    # 使用预编译包
-sudo ./online_install.sh --source           # 从源码编译安装
-sudo ./online_install.sh --help             # 查看帮助信息
-```
-
-### 方式三：Docker快速部署
-```bash
-# 一键Docker安装
-curl -sSL https://gitee.com/dark-beam/SentinelX/raw/main/docker_install.sh | bash
-```
-
-### 方式四：手动源码安装
-```bash
-# 1. 克隆仓库
-git clone https://gitee.com/dark-beam/SentinelX.git
+# 或者使用 Docker Compose
+git clone https://github.com/Blacklight139/SentinelX.git
 cd SentinelX
-
-# 2. 生成加密密钥
-cd server
-chmod +x generate_keys.sh
-./generate_keys.sh
-
-# 3. 编译安装
-go build -o sentinelx-server main.go
-sudo ./install.sh
+docker-compose up -d
 ```
 
-## 📋 系统要求
+✨ 核心特性
 
-### 服务端要求
-- **操作系统**: Ubuntu 18.04+, CentOS 7+, RHEL 8+, Debian 10+
-- **CPU**: 双核 2.0GHz 或更高
-- **内存**: 至少 2GB RAM（推荐 4GB）
-- **存储**: 至少 20GB 可用空间（日志存储）
-- **网络**: 需要开放 8443（HTTPS）和 9090（Metrics）端口
+🔒 安全监控
 
-### 客户端要求
-- **操作系统**: Windows 10+, macOS 10.15+, Linux（各发行版）
-- **内存**: 至少 1GB RAM
-- **网络**: 能够访问 SentinelX 服务端
+· 端到端加密通信: 使用 RSA-2048 + AES-256 双重加密
+· 实时流量分析: 实时监控 FRP 流量，检测中间商操控和域名劫持攻击
+· 加密日志存储: 日志文件采用双重加密，存储在安全的 meg 文件夹中
+· 智能告警系统: 基于规则的异常检测，实时告警推送
 
-### 开发环境要求
-- **Go**: 1.19 或更高版本
-- **Docker**: 20.10+（可选，用于容器化部署）
-- **OpenSSL**: 用于生成加密密钥
+📊 系统功能
 
-## ⚙️ 安装选项详解
+· Go语言客户端: 高性能的Go客户端，支持跨平台部署
+· RESTful API: 完整的API接口支持，便于集成和扩展
+· Prometheus集成: 完整的监控指标导出
+· 多平台支持: Linux、Windows、macOS全平台支持
+· 容器化部署: 支持Docker和Kubernetes部署
 
-### 1. 一键安装选项
-```bash
-# 基本安装
-curl -sSL https://gitee.com/dark-beam/SentinelX/raw/main/install.sh | sudo bash
+🚧 开发中功能
 
-# 带参数安装
-curl -sSL https://gitee.com/dark-beam/SentinelX/raw/main/install.sh | sudo bash -s -- \
-  --source \          # 从源码编译
-  --log-level info \   # 设置日志级别
-  --no-firewall       # 不配置防火墙
-```
+· 三端互通: Web、移动端、桌面端统一管理界面（开发中）
+· 机器学习检测: 基于机器学习的异常流量检测（规划中）
+· 分布式部署: 支持多节点集群部署（规划中）
 
-### 2. 高级安装选项
-```bash
-# 自定义安装目录
-export SENTINELX_HOME=/opt/custom_path
-sudo ./online_install.sh
+🏗️ 系统架构
 
-# 指定配置文件
-sudo ./online_install.sh --config /path/to/config.yaml
+架构概览
 
-# 跳过密钥生成（使用现有密钥）
-sudo ./online_install.sh --skip-keys
-```
-
-### 3. 生产环境部署
-```bash
-# 创建专用用户和组
-sudo groupadd sentinelx
-sudo useradd -r -g sentinelx -s /bin/false sentinelx
-
-# 安装服务
-sudo ./online_install.sh --production --user sentinelx --group sentinelx
-
-# 配置日志轮转
-sudo cp server/logrotate.conf /etc/logrotate.d/sentinelx
-```
-
-## 🏗️ 系统架构
-
-### 总体架构
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
@@ -132,24 +89,26 @@ sudo cp server/logrotate.conf /etc/logrotate.d/sentinelx
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
 │  SentinelX      │◀────│  加密通道       │◀────│  加密存储       │
-│  GUI Client     │     │  (RSA-2048)     │     │  (meg文件夹)    │
+│  Go Client      │     │  (RSA-2048)     │     │  (meg文件夹)    │
 │                 │     │                 │     │                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
 
-### 组件说明
+组件说明
 
-| 组件 | 功能描述 | 端口 |
-|------|----------|------|
-| **SentinelX Server** | 主服务器，处理所有监控逻辑 | 8443 (HTTPS) |
-| **WebSocket Service** | 实时数据传输服务 | 8443 (WSS) |
-| **Metrics Exporter** | 性能指标导出 | 9090 (HTTP) |
-| **Key Management** | 密钥管理与轮换 | 内部 |
-| **Log Storage** | 加密日志存储 | 文件系统 |
+组件 功能 端口 部署方式
+sentinelx-server 主应用服务器，处理所有业务逻辑 8443 Docker/二进制
+sentinelx-client Go语言客户端，提供命令行接口 - 二进制
+PostgreSQL 关系型数据库，存储配置和元数据 5432 Docker/外部
+Redis 缓存和消息队列 6379 Docker/外部
+Prometheus 指标收集和监控 9090 Docker/外部
 
-## 🔧 配置说明
+⚙️ 配置说明
 
-### 基本配置文件 (`config.yaml`)
+基础配置文件
+
+创建 /etc/sentinelx/config.yaml：
+
 ```yaml
 server:
   address: "0.0.0.0:8443"
@@ -179,290 +138,213 @@ frp_monitoring:
     - 8080
 ```
 
-### 环境变量配置
-```bash
-# 启动时覆盖配置
-export SENTINELX_LOG_LEVEL=debug
-export SENTINELX_SERVER_ADDR=:9443
-export SENTINELX_LOG_DIR=/data/sentinelx/logs
+📡 API 文档
 
-# 启动服务
-./sentinelx-server
+基础认证
+
+```bash
+# 获取访问令牌
+curl -X POST https://localhost:8443/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"your-password"}'
+
+# 使用令牌访问 API
+curl -H "Authorization: Bearer <token>" \
+  https://localhost:8443/api/v1/logs
 ```
 
-## 📊 数据流处理流程
+主要 API 端点
 
-### 1. 流量监控与捕获
+端点 方法 描述
+/api/v1/health GET 健康检查
+/api/v1/auth/login POST 用户登录
+/api/v1/logs GET 获取日志列表
+/api/v1/logs/{id} GET 获取特定日志
+/api/v1/stats GET 获取统计信息
+/api/v1/alerts GET 获取告警列表
+/api/v1/monitor/start POST 启动监控
+/api/v1/monitor/stop POST 停止监控
+
+🔧 Go 客户端使用
+
+安装 Go 客户端
+
+```bash
+# 从源码编译
+go install github.com/Blacklight139/SentinelX/client@latest
+
+# 或下载预编译版本
+# Linux
+wget https://github.com/Blacklight139/SentinelX/releases/latest/download/sentinelx-client-linux-amd64
+# Windows
+wget https://github.com/Blacklight139/SentinelX/releases/latest/download/sentinelx-client-windows-amd64.exe
+# macOS
+wget https://github.com/Blacklight139/SentinelX/releases/latest/download/sentinelx-client-darwin-amd64
+```
+
+客户端命令
+
+```bash
+# 连接到服务端
+sentinelx-client connect --server https://your-server.com:8443 --token your-token
+
+# 查看监控状态
+sentinelx-client monitor status
+
+# 获取日志
+sentinelx-client logs list --severity high --last 24h
+
+# 启动流量监控
+sentinelx-client monitor start --target 192.168.1.100:7000
+
+# 查看系统统计
+sentinelx-client stats
+
+# 导出加密日志
+sentinelx-client logs export --output ./logs.tar.gz
+```
+
+Go 客户端 SDK 示例
+
 ```go
-// 监控FRP流量并检测恶意行为
-func monitorFRPTraffic(conn net.Conn) {
-    // 解析FRP协议头
-    header := parseFRPHeader(conn)
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "github.com/Blacklight139/SentinelX/client"
+)
+
+func main() {
+    // 创建客户端
+    cfg := &client.Config{
+        ServerURL: "https://your-server.com:8443",
+        AuthToken: "your-auth-token",
+    }
     
-    // 检测中间商操控特征
-    if isMaliciousManipulation(header) {
-        // 记录攻击信息
-        logEntry := TrafficLog{
-            Timestamp:     time.Now(),
-            AttackDomain:  detectAttackDomain(header),
-            TargetDomain:  detectTargetDomain(header),
-            TrafficBytes:  calculateTraffic(conn),
-            SourceIP:      conn.RemoteAddr().String(),
-            ManipulationType: detectManipulationType(header),
-        }
-        
-        // 加密并存储日志
-        encryptedLog := encryptLog(logEntry, clientPublicKey)
-        storeEncryptedLog(encryptedLog)
-        
-        // 实时通知客户端
-        notifyClient(logEntry)
+    cli, err := client.NewClient(cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // 获取监控状态
+    status, err := cli.Monitor.Status(context.Background())
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("监控状态: %v\n", status)
+    
+    // 获取最近的高危日志
+    logs, err := cli.Logs.List(context.Background(), &client.LogFilter{
+        Severity: []string{"high", "critical"},
+        Limit:    50,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("找到 %d 条日志\n", len(logs))
+    
+    // 订阅实时日志
+    stream, err := cli.Logs.Stream(context.Background(), &client.LogStreamFilter{})
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    for log := range stream {
+        fmt.Printf("新日志: %+v\n", log)
     }
 }
 ```
 
-### 2. 加密存储机制
-```go
-// 双重加密存储系统
-type EncryptionSystem struct {
-    commPrivateKey *rsa.PrivateKey  // 通信私钥
-    commPublicKey  *rsa.PublicKey   // 通信公钥
-    accessPrivateKey *rsa.PrivateKey // 访问日志私钥
-    accessPublicKey  *rsa.PublicKey  // 访问日志公钥
-}
+🐳 容器化部署
 
-// 存储主日志（客户端可查看）
-func (es *EncryptionSystem) storeMainLog(log TrafficLog) error {
-    // 序列化日志
-    data, _ := json.Marshal(log)
-    
-    // 使用通信公钥加密
-    encryptedData, err := rsa.EncryptOAEP(
-        sha256.New(),
-        rand.Reader,
-        es.commPublicKey,
-        data,
-        nil,
-    )
-    
-    // 存储到meg文件夹
-    filename := fmt.Sprintf("log_%s.enc", time.Now().Format("20060102_150405"))
-    return os.WriteFile(filepath.Join("meg", filename), encryptedData, 0600)
-}
-```
+Docker Compose 部署
 
-## 🔐 安全特性
-
-### 多层安全防护
-1. **传输层加密**：TLS 1.3 + RSA-2048密钥交换
-2. **数据加密**：端到端RSA-OAEP加密
-3. **存储加密**：双重加密机制分离权限
-4. **访问控制**：一次性令牌下载机制
-5. **完整性验证**：SHA-256哈希校验
-
-### 密钥管理策略
-```bash
-# 密钥生成
-./generate_keys.sh
-
-# 密钥轮换（生产环境建议每月轮换）
-./rotate_keys.sh --type communication --backup
-
-# 密钥备份
-tar -czf keys_backup_$(date +%Y%m%d).tar.gz /etc/sentinelx/keys/
-```
-
-## 🖥️ 客户端使用
-
-### GUI客户端功能
-- 🔑 **安全连接**：使用RSA密钥对建立加密连接
-- 📊 **实时监控**：可视化展示流量统计和攻击检测
-- 🔍 **日志查看**：解密并显示存储在meg文件夹中的日志
-- ⚡ **性能监控**：实时显示系统资源使用情况
-- 🛡️ **告警系统**：检测到攻击时显示实时告警
-
-### 客户端连接配置
-```json
-{
-  "server": {
-    "address": "your-server.com:8443",
-    "timeout": 30,
-    "reconnect_interval": 5
-  },
-  "encryption": {
-    "public_key_path": "keys/communication_public.pem",
-    "private_key_path": "keys/client_private.key",
-    "access_public_key_path": "keys/access_public.pem"
-  },
-  "monitoring": {
-    "target_ip": "127.0.0.1",
-    "target_ports": [7000, 7001, 8080],
-    "check_interval": 10
-  }
-}
-```
-
-## 📈 监控与告警
-
-### 内置监控指标
-- 实时连接数
-- 流量统计（攻击/正常）
-- 系统资源使用率
-- 加密/解密性能
-- 存储空间使用
-
-### 告警规则示例
-```yaml
-alerts:
-  - name: "high_traffic_anomaly"
-    condition: "traffic_rate > 100MBps AND attack_ratio > 0.3"
-    severity: "critical"
-    actions: ["email", "webhook", "log"]
-    
-  - name: "multiple_attack_domains"
-    condition: "unique_attack_domains > 10 WITHIN 5m"
-    severity: "high"
-    actions: ["email", "log"]
-```
-
-## 🐳 Docker部署
-
-### Docker Compose配置
 ```yaml
 version: '3.8'
+
 services:
-  sentinelx-server:
-    image: sentinelx/server:latest
+  sentinelx:
+    image: ghcr.io/blacklight139/sentinelx:latest
+    container_name: sentinelx-server
+    restart: unless-stopped
     ports:
       - "8443:8443"
       - "9090:9090"
     volumes:
-      - ./data:/var/lib/sentinelx
-      - ./config:/etc/sentinelx
+      - sentinelx_data:/var/lib/sentinelx
+      - sentinelx_config:/etc/sentinelx
     environment:
-      - LOG_LEVEL=info
-      - TZ=Asia/Shanghai
-    restart: unless-stopped
+      - SENTINELX_DB_HOST=postgres
+      - SENTINELX_DB_PASSWORD=yourpassword
+    networks:
+      - sentinelx-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: sentinelx
+      POSTGRES_USER: sentinelx
+      POSTGRES_PASSWORD: yourpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sentinelx-network
+
+volumes:
+  sentinelx_data:
+  sentinelx_config:
+  postgres_data:
+
+networks:
+  sentinelx-network:
+    driver: bridge
 ```
 
-### 快速启动
+🔧 运维管理
+
+日常维护
+
 ```bash
-# 创建必要目录
-mkdir -p sentinelx/{data,config,logs}
+# 查看服务状态
+systemctl status sentinelx-server
 
-# 启动服务
-docker-compose up -d
-
-# 查看日志
-docker-compose logs -f sentinelx-server
-```
-
-## 🔄 备份与恢复
-
-### 自动备份脚本
-```bash
-#!/bin/bash
-# 每日自动备份
-BACKUP_DIR="/opt/sentinelx/backup"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# 停止服务
-systemctl stop sentinelx-server
-
-# 创建备份
-tar -czf $BACKUP_DIR/backup_$DATE.tar.gz \
-  /etc/sentinelx \
-  /var/lib/sentinelx \
-  /opt/sentinelx/config
-
-# 启动服务
-systemctl start sentinelx-server
-
-# 清理旧备份（保留7天）
-find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
-```
-
-### 数据恢复
-```bash
-# 停止服务
-systemctl stop sentinelx-server
-
-# 恢复备份
-tar -xzf backup_20240115_143022.tar.gz -C /
-
-# 恢复权限
-chown -R sentinelx:sentinelx /etc/sentinelx /var/lib/sentinelx
-
-# 启动服务
-systemctl start sentinelx-server
-```
-
-## 🐛 故障排除
-
-### 常见问题
-
-#### 1. 服务启动失败
-```bash
 # 查看日志
 journalctl -u sentinelx-server -f
 
-# 检查端口占用
-netstat -tlnp | grep :8443
+# 备份数据
+sentinelx-cli backup --output /backup/sentinelx-$(date +%Y%m%d).tar.gz
 
-# 检查密钥权限
-ls -la /etc/sentinelx/keys/
+# 更新系统
+sentinelx-cli update --version latest
 ```
 
-#### 2. 客户端连接失败
-```bash
-# 测试端口连通性
-openssl s_client -connect your-server.com:8443
+监控指标
 
-# 检查防火墙
-sudo ufw status
-sudo firewall-cmd --list-all
+SentinelX 提供 Prometheus 指标：
+
+```bash
+# 访问指标端点
+curl http://localhost:9090/metrics
+
+# 主要指标
+# sentinelx_connections_active     当前活跃连接数
+# sentinelx_connections_total      总连接数
+# sentinelx_traffic_bytes_total    总流量字节数
+# sentinelx_security_events_total  安全事件总数
+# sentinelx_logs_stored_total      存储的日志总数
 ```
 
-#### 3. 存储空间不足
+🤝 开发与贡献
+
+开发环境设置
+
 ```bash
-# 清理旧日志
-find /var/lib/sentinelx/meg -name "*.enc" -mtime +30 -delete
-
-# 查看存储使用
-du -sh /var/lib/sentinelx/meg/
-```
-
-## 📚 文档资源
-
-### 在线文档
-- 📖 **项目主页**: [https://gitee.com/dark-beam/SentinelX](https://gitee.com/dark-beam/SentinelX)
-- 📚 **安装指南**: [https://gitee.com/dark-beam/SentinelX/wiki/Installation](https://gitee.com/dark-beam/SentinelX/wiki/Installation)
-- 🔧 **配置文档**: [https://gitee.com/dark-beam/SentinelX/wiki/Configuration](https://gitee.com/dark-beam/SentinelX/wiki/Configuration)
-- 🐛 **故障排除**: [https://gitee.com/dark-beam/SentinelX/wiki/Troubleshooting](https://gitee.com/dark-beam/SentinelX/wiki/Troubleshooting)
-
-### 命令行工具
-```bash
-# 查看系统状态
-sentinelx-cli status
-
-# 查看日志统计
-sentinelx-cli logs --stats
-
-# 测试监控规则
-sentinelx-cli test-rule --file rule.yaml
-
-# 生成配置模板
-sentinelx-cli config generate
-```
-
-## 🤝 贡献指南
-
-我们欢迎各种形式的贡献！请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-### 开发环境搭建
-```bash
-# 1. Fork 本仓库
-git clone https://gitee.com/YOUR_USERNAME/SentinelX.git
+# 1. 克隆仓库
+git clone https://github.com/Blacklight139/SentinelX.git
 cd SentinelX
 
 # 2. 安装依赖
@@ -471,65 +353,102 @@ go mod download
 
 # 3. 启动开发服务器
 go run main.go --dev
-
-# 4. 运行测试
-go test ./...
 ```
 
-### 代码规范
-- 使用 `go fmt` 格式化代码
-- 提交前运行 `go vet` 和 `go test`
-- 遵循 Go 语言官方代码规范
-- 为新增功能编写单元测试
+贡献流程
 
-## 📄 许可证
+1. Fork 本项目
+2. 创建功能分支 (git checkout -b feature/AmazingFeature)
+3. 提交更改 (git commit -m 'Add some AmazingFeature')
+4. 推送到分支 (git push origin feature/AmazingFeature)
+5. 创建 Pull Request
 
-本项目基于 MIT 许可证发布 - 查看 [LICENSE](LICENSE) 文件了解详情。
+📄 许可证
+
+本项目采用 GNU Affero General Public License v3.0 (AGPL-3.0) 许可证。
+
+AGPL-3.0 许可证要点
+
+· ✅ 自由使用: 可以自由使用、修改和分发本软件
+· ✅ 开源要求: 任何修改后的版本必须以相同许可证开源
+· ✅ 网络服务条款: 即使通过网络提供服务，也必须提供源代码
+· ✅ 专利授权: 包含明确的专利授权条款
+
+完整的许可证文本
 
 ```
-MIT License
+SentinelX - 安全流量监控与日志系统
+Copyright (C) 2024 Blacklight139
 
-Copyright (c) 2024 Dark Beam
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
-## 🚨 免责声明
+商业许可
 
-本项目仅用于安全研究和授权的合规监控。用户需确保在合法范围内使用本系统，并遵守所有适用的法律法规。开发者不对任何滥用行为负责。
+对于需要以下场景的企业用户：
 
-**重要提示**：
-- 部署前请确保已获得相关监控权限
-- 遵守当地法律法规
-- 建议在测试环境中充分验证后再投入生产使用
-- 定期更新系统和安全补丁
+· 需要闭源修改和分发
+· 需要商业技术支持
+· 需要定制化开发
 
-## 📞 支持与联系
+请联系我们获取商业许可选项。
 
-### 社区支持
-- 🐛 **问题反馈**: 国内渠道：[https://gitee.com/dark-beam/SentinelX/issues](https://gitee.com/dark-beam/SentinelX/issues)
-- 国外渠道：[https://github.com/Blacklight139/SentinelX/issues](https://github.com/Blacklight139/SentinelX/issues)
-- 💬 **讨论区**: 国内渠道：[https://gitee.com/dark-beam/SentinelX/pulls](https://gitee.com/dark-beam/SentinelX/pulls)
-- 国外渠道：[https://github.com/Blacklight139/SentinelX/pulls](https://github.com/Blacklight139/SentinelX/pulls)
-- 📧 **邮箱**: 3056319173@qq.com
+🏆 致谢
 
-### 商业支持
-如需商业支持、定制开发或企业版授权，请联系：
-- **官网**: (暂未开放)
-- **商务合作**: 
-- **技术支持**: 3056319173@qq.com
+核心贡献者
 
-### 更新日志
-查看最新版本和更新内容：（无）
+· @Blacklight139 - 项目创建者和维护者
+· @Blacklight - 中文社区维护
+
+使用的开源项目
+
+项目 用途 许可证
+Go 编程语言 BSD-3-Clause
+Gorilla WebSocket WebSocket 通信 BSD-2-Clause
+Gin Web 框架 MIT
+GORM ORM 框架 MIT
+Prometheus 监控指标 Apache-2.0
+
+特别感谢
+
+· Go 语言团队 - 提供优秀的编程语言和工具链
+· 所有贡献者 - 感谢每一位为项目做出贡献的开发者
+· 用户社区 - 感谢所有用户的反馈和支持
+
+📞 支持与社区
+
+文档资源
+
+· 📖 官方文档: https://sentinelx.darkbeam.cn/docs（未开放）
+· 📚 API 文档: https://api.sentinelx.darkbeam.cn/docs（未开放）
+
+社区支持
+
+平台 链接 描述
+💬 GitHub Discussions https://github.com/Blacklight139/SentinelX/discussions 技术讨论、Q&A
+🐛 GitHub Issues https://github.com/Blacklight139/SentinelX/issues Bug 报告、功能请求
+💬 Gitee Issues https://gitee.com/dark-beam/SentinelX/issues 中文问题反馈
 
 ---
 
-**SentinelX** - 守护您的网络流量安全 🛡️
+<div align="center">⭐ 支持我们
+
+如果 SentinelX 对您有帮助，请给我们一个 Star！ ⭐
+
+GitHub: https://github.com/Blacklight139/SentinelX
+Gitee: https://gitee.com/dark-beam/SentinelX
+
+SentinelX - 守护您的网络流量安全 🔒
+
+</div>
