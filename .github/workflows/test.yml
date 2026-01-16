@@ -1,0 +1,103 @@
+name: Automated Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨2点运行
+
+jobs:
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+    
+    - name: Run unit tests
+      working-directory: ./server
+      run: |
+        go test -v -race -coverprofile=coverage.out ./...
+        go tool cover -func=coverage.out
+    
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: server/coverage.out
+        retention-days: 30
+  
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-test
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+    
+    - name: Run integration tests
+      working-directory: ./server
+      env:
+        POSTGRES_URL: postgres://postgres:postgres@localhost:5432/testdb
+      run: |
+        # 创建测试数据库
+        psql -h localhost -U postgres -c "CREATE DATABASE testdb;"
+        go test -v -tags=integration ./...
+  
+  load-test:
+    name: Load Tests
+    runs-on: ubuntu-latest
+    needs: unit-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+    
+    - name: Build test binary
+      working-directory: ./server
+      run: |
+        go test -c -o loadtest.test
+    
+    - name: Run load tests
+      working-directory: ./server
+      run: |
+        ./loadtest.test -test.bench=. -test.benchtime=30s
+    
+    - name: Upload load test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: load-test-results
+        path: server/loadtest.*
+        retention-days: 30
