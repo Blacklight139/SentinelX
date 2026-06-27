@@ -1,127 +1,117 @@
-# SentinelX 安装脚本优化与功能延伸 - 产品需求文档
+# SentinelX 多平台一键安装脚本 - 产品需求文档
 
 ## Why
-当前的一键安装脚本虽然功能完整，但存在以下问题：
-1. 缺少对已安装状态的检测（重复安装处理）
-2. 缺少安装前环境检查
-3. 缺少回滚机制
-4. 缺少详细的安装进度反馈
-5. Docker 和二进制安装流程可以更模块化
-6. **仅支持 Linux，需要扩展到 Windows Server、Ubuntu、Debian、macOS**
-
-README 中声明的多平台支持（Linux、Windows、macOS）需要通过安装脚本实现。
+用户需要一个统一的一键安装脚本，能够：
+1. 自动检测当前操作系统（Windows Server、Ubuntu、Debian、macOS 等）
+2. 显示友好的交互菜单
+3. 根据检测结果调用对应平台的安装脚本
+4. 支持 Docker 和二进制两种安装方式
+5. 支持卸载功能
 
 ## What Changes
 
-### 多系统支持
-- **Windows Server**: PowerShell 脚本，支持二进制安装和 Docker Desktop
-- **Ubuntu/Debian**: Bash 脚本，支持 apt 包管理
-- **macOS**: Bash/Zsh 脚本，支持 Homebrew 和 Docker Desktop
-- 所有平台共用一套安装逻辑，但系统检测和包管理差异化处理
+### 多平台入口脚本 (install.sh)
+- 自动检测操作系统类型（Linux 发行版、Windows、macOS）
+- 显示统一的交互菜单
+- 根据选择的安装方式和检测到的系统，调用对应脚本
 
-### 安装脚本优化
-- 优化菜单交互，增加状态检测
-- 添加安装前环境检查（端口占用、依赖检测）
-- 添加安装进度条和详细日志
-- 添加安装回滚机制（失败时清理）
-- 模块化 Docker 和二进制安装函数
-- 优化卸载流程，添加更多选项（保留配置、强制卸载）
-- 添加 `--verbose` 调试模式
-- 添加 `--skip-confirmation` 非交互模式
+### 平台检测逻辑
+| 检测结果 | 调用脚本 |
+|---------|---------|
+| Ubuntu/Debian | install-linux.sh (Bash) |
+| CentOS/RHEL/Rocky/Alma | install-linux.sh (Bash) |
+| Fedora | install-linux.sh (Bash) |
+| Windows Server | install-windows.ps1 (PowerShell) |
+| macOS | install-macos.sh (Bash/Zsh) |
 
-### 代码延伸（按 README 要求）
-- 实现 Go Client SDK 示例代码
-- 添加 PostgreSQL/Redis 集成初始化代码（docker-compose 已配置但代码未集成）
+### 交互菜单选项
+```
+╔═══════════════════════════════════════════════════════════════╗
+║                    SentinelX 安装程序                         ║
+╠═══════════════════════════════════════════════════════════════╣
+║  检测到系统: Ubuntu 22.04 LTS                                 ║
+╠═══════════════════════════════════════════════════════════════╣
+║  1) 🚀 Docker 安装 (推荐 - 隔离环境，快速部署)                 ║
+║  2) 📦 二进制安装 (本地安装，适合生产环境)                     ║
+║  3) 🔄 升级 SentinelX                                         ║
+║  4) 🗑️  卸载 SentinelX                                        ║
+║  ─────────────────────────────────────────────────────────── ║
+║  0) ❌ 退出                                                   ║
+╚═══════════════════════════════════════════════════════════════╝
+请选择 [0-4]:
+```
+
+### 卸载菜单选项
+```
+╔═══════════════════════════════════════════════════════════════╗
+║                    SentinelX 卸载程序                         ║
+╠═══════════════════════════════════════════════════════════════╣
+║  1) 🔹 标准卸载 - 保留配置文件                                ║
+║  2) 🔸 完全卸载 - 删除所有文件（包括配置）                    ║
+║  3) 💾 保留数据卸载 - 保留数据目录                            ║
+║  ─────────────────────────────────────────────────────────── ║
+║  0) ↩️ 返回主菜单                                            ║
+╚═══════════════════════════════════════════════════════════════╝
+```
 
 ## Impact
-- Affected specs: code-optimization（继承其模块化成果）
+- Affected specs: code-optimization
 - Affected code:
-  - `/workspace/install.sh` - Linux 主安装脚本
-  - `/workspace/install-windows.ps1` - Windows Server 安装脚本（新增）
-  - `/workspace/install-macos.sh` - macOS 安装脚本（新增）
-  - `/workspace/online_install.sh` - Linux 在线安装脚本
+  - `/workspace/install.sh` - 多平台入口脚本（重构）
+  - `/workspace/scripts/install-linux.sh` - Linux 安装脚本（新增）
+  - `/workspace/scripts/install-windows.ps1` - Windows 安装脚本（新增）
+  - `/workspace/scripts/install-macos.sh` - macOS 安装脚本（新增）
 
 ## ADDED Requirements
 
-### Requirement: 多平台安装脚本
-安装脚本 SHALL 支持以下操作系统：
+### Requirement: 系统自动检测
+脚本 SHALL 自动检测以下操作系统：
 
-#### Scenario: Ubuntu/Debian 安装
-- **WHEN** 用户在 Ubuntu 或 Debian 系统执行安装脚本
-- **THEN** 使用 apt-get 安装依赖，二进制方式部署或 Docker 部署
+#### Scenario: Linux 检测
+- **WHEN** 在 Linux 系统执行 install.sh
+- **THEN** 检测发行版（Ubuntu/Debian/CentOS/RHEL/Fedora）并显示
 
-#### Scenario: Windows Server 安装
-- **WHEN** 用户在 Windows Server 系统执行安装脚本
-- **THEN** 使用 PowerShell 安装依赖，二进制方式部署或 Docker Desktop
+#### Scenario: Windows 检测
+- **WHEN** 在 Windows 系统执行 install.ps1 或 .\install.bat
+- **THEN** 检测 Windows 版本并显示
 
-#### Scenario: macOS 安装
-- **WHEN** 用户在 macOS 系统执行安装脚本
-- **THEN** 使用 Homebrew 安装依赖，二进制方式部署或 Docker Desktop
+#### Scenario: macOS 检测
+- **WHEN** 在 macOS 系统执行 install.sh
+- **THEN** 检测 macOS 版本并显示
 
-### Requirement: 跨平台配置一致性
-- **WHEN** 在任何平台安装 SentinelX
-- **THEN** 配置文件格式和 API 接口保持一致
+### Requirement: 交互式菜单
+菜单 SHALL 提供以下功能：
 
-### Requirement: 增强型安装脚本
-安装脚本 SHALL 提供以下功能：
+#### Scenario: 主菜单显示
+- **WHEN** 用户运行安装脚本
+- **THEN** 显示检测到的系统、版本和可用选项
 
-#### Scenario: 全新安装
-- **WHEN** 用户选择安装且系统未安装过 SentinelX
-- **THEN** 执行完整安装流程，安装成功后显示访问信息
+#### Scenario: 安装选项
+- **WHEN** 用户选择安装选项
+- **THEN** 调用对应平台的安装函数
 
-#### Scenario: 已安装检测
-- **WHEN** 用户选择安装但系统已安装 SentinelX
-- **THEN** 提示用户已安装，询问是否要重新安装或升级
+#### Scenario: 升级选项
+- **WHEN** 用户选择升级
+- **THEN** 检测已安装版本并提示升级
 
-#### Scenario: 环境检查失败
-- **WHEN** 安装前检测到端口被占用或依赖缺失
-- **THEN** 显示详细错误信息并退出，不执行安装
-
-#### Scenario: 安装失败回滚
-- **WHEN** 安装过程中发生错误
-- **THEN** 自动清理已创建的目录和服务，恢复到安装前状态
-
-### Requirement: 卸载脚本增强
-卸载脚本 SHALL 提供以下选项：
-
-#### Scenario: 标准卸载
+#### Scenario: 卸载选项
 - **WHEN** 用户选择卸载
-- **THEN** 停止服务、删除文件、保留配置文件
+- **THEN** 显示卸载选项菜单，确认后执行
 
-#### Scenario: 完全卸载
-- **WHEN** 用户选择完全卸载并确认
-- **THEN** 删除所有文件包括配置文件
-
-#### Scenario: 强制卸载
-- **WHEN** 用户选择强制卸载（忽略错误）
-- **THEN** 尽力删除所有相关文件和配置
-
-## MODIFIED Requirements
-
-### Requirement: 一键安装脚本
-安装脚本 SHALL 支持以下安装方式：
-
-#### Scenario: Docker 安装
-- **GIVEN** 系统已安装 Docker
-- **WHEN** 用户选择 Docker 安装
-- **THEN** 使用 docker-compose 启动完整服务栈（Server + PostgreSQL + Redis + Prometheus + Grafana）
-
-#### Scenario: 二进制安装
-- **GIVEN** 系统无 Docker 或用户选择二进制安装
-- **WHEN** 用户选择二进制安装
-- **THEN** 下载/编译二进制，配置服务（Linux: systemd, Windows: Windows Service, macOS: launchd）
+### Requirement: 跨平台一致性
+所有平台 SHALL 保持一致：
+- 相同的菜单交互体验
+- 相同的配置格式
+- 相同的 API 接口
+- 相同的日志格式
 
 ## Constraints
-- 必须保持向后兼容，不改变现有配置格式
-- Windows 安装脚本要求 PowerShell 5.1+
-- macOS 安装脚本要求 macOS 11+ (Big Sur)
-- 安装路径：
-  - Linux: `/opt/sentinelx`, `/etc/sentinelx`, `/var/lib/sentinelx`
-  - Windows: `C:\Program Files\SentinelX`, `C:\ProgramData\SentinelX`
-  - macOS: `/opt/sentinelx`, `/etc/sentinelx`, `/var/lib/sentinelx`
-- Docker 安装使用 docker-compose v2+
+- 入口脚本 (install.sh) 需要 Bash 兼容环境
+- Windows 脚本需要 PowerShell 5.1+
+- macOS 脚本需要 macOS 11+
+- 所有平台需要网络连接以下载依赖
 
 ## Assumptions
 - 用户有管理员/root/sudo 权限
-- 系统有网络连接以下载依赖
-- Docker 安装需要相应平台的 Docker Desktop（Windows/macOS）或 Docker Engine（Linux）
+- 系统有网络连接
+- Docker 安装需要对应平台的 Docker Desktop（Windows/macOS）
