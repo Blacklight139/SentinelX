@@ -1,53 +1,78 @@
-# SentinelX 多平台一键安装脚本 - 验证清单
+# SentinelX 安装脚本优化与功能延伸 - 验证清单
 
-## 入口脚本验证 (install.sh)
-- [ ] 自动检测操作系统类型（Linux/Windows/macOS）
-- [ ] 显示友好的交互菜单
-- [ ] 支持命令行参数（--docker, --binary, --uninstall, --help）
-- [ ] 支持静默模式 --yes 自动确认
-- [ ] 支持 Ctrl+C 中断
+## 脚本结构验证
+- [ ] install.sh 函数结构清晰，每个函数职责单一
+- [ ] install-windows.ps1 函数结构清晰（新增）
+- [ ] install-macos.sh 函数结构清晰（新增）
+- [ ] 支持 `--verbose` 调试模式
+- [ ] 支持 `--skip-confirmation` 非交互模式
 
-## Linux 安装脚本验证 (scripts/install-linux.sh)
+## 安装前检查验证
+- [ ] 端口占用检测正常工作（8443, 9090, 6060）
+- [ ] 依赖检测正常工作（curl, wget, tar, openssl, docker 等）
+- [ ] 已安装状态检测正常工作
+- [ ] 磁盘空间检查正常工作
+- [ ] 网络连接检测正常工作
+- [ ] 检测失败时正确退出
+
+## 进度反馈验证
+- [ ] 显示安装步骤计数（共 N 步）
+- [ ] 成功/失败状态有明确图标
+- [ ] 日志输出格式清晰
+
+## 回滚机制验证
+- [ ] 安装失败时正确清理已创建的资源
+- [ ] Ctrl+C 中断时正确清理
+- [ ] 卸载后无残留服务
+
+## 卸载功能验证
+- [ ] 标准卸载正常工作（保留配置）
+- [ ] 完全卸载（--remove-config）正常工作
+- [ ] 强制卸载（--force）正常工作
+- [ ] 保留数据卸载（--keep-data）正常工作
+
+## Linux Docker 安装验证
+- [ ] Docker 未安装时自动安装
+- [ ] Docker 服务未运行时提示启动
+- [ ] docker-compose.yml 正确下载和配置
+- [ ] 镜像正确拉取
+- [ ] 容器启动后健康检查通过
+- [ ] 访问 https://localhost:8443/api/v1/health 返回 200
+
+## Linux 二进制安装验证
+- [ ] 从 GitHub releases 下载正确版本
+- [ ] SHA256 校验通过
+- [ ] 密钥正确生成到 /etc/sentinelx/keys/
+- [ ] systemd 服务正确配置
+- [ ] 服务启动后健康检查通过
+- [ ] 访问 https://localhost:8443/api/v1/health 返回 200
+
+## Windows Server 安装验证
+- [ ] PowerShell 5.1+ 可执行
+- [ ] Docker Desktop 检测正常
+- [ ] 端口占用检测正常
+- [ ] Docker 方式安装成功
+- [ ] 二进制方式安装成功并注册为 Windows Service
+- [ ] 服务启动后健康检查通过
+
+## macOS 安装验证
+- [ ] macOS 11+ 可执行
+- [ ] Homebrew 检测正常
+- [ ] Docker Desktop 检测正常
+- [ ] 端口占用检测正常
+- [ ] Docker 方式安装成功
+- [ ] 二进制方式安装成功并注册为 launchd agent
+- [ ] 服务启动后健康检查通过
+
+## 在线安装脚本验证
+- [ ] online_install.sh 包含所有优化
+- [ ] 可通过 curl 远程执行
+- [ ] Go 1.25 安装支持正常
+
+## 多平台兼容性验证
 - [ ] Ubuntu 系统安装正常
 - [ ] Debian 系统安装正常
 - [ ] CentOS/RHEL 系统安装正常
 - [ ] Fedora 系统安装正常
-- [ ] Docker 方式安装成功
-- [ ] 二进制方式安装成功
-- [ ] 服务启动后健康检查通过
-
-## Windows 安装脚本验证 (scripts/install-windows.ps1)
-- [ ] PowerShell 5.1+ 可正常执行
-- [ ] 检测 Windows Server 版本
-- [ ] Docker Desktop 方式安装成功
-- [ ] 二进制方式安装成功并注册为 Windows Service
-
-## macOS 安装脚本验证 (scripts/install-macos.sh)
-- [ ] macOS 11+ 可正常执行
-- [ ] 检测 macOS 版本
-- [ ] Docker Desktop 方式安装成功
-- [ ] 二进制方式安装成功并注册为 launchd agent
-
-## 卸载功能验证
-- [ ] Linux 标准卸载正常（保留配置）
-- [ ] Linux 完全卸载正常（删除配置）
-- [ ] Linux 保留数据卸载正常
-- [ ] Windows 卸载正常
-- [ ] macOS 卸载正常
-- [ ] 卸载后无残留服务
-
-## 安装前检查验证
-- [ ] 端口占用检测正常（8443, 9090, 6060）
-- [ ] 依赖检测正常
-- [ ] 已安装状态检测正常
-- [ ] 检测失败时正确退出
-
-## 进度反馈验证
-- [ ] 步骤计数显示
-- [ ] 进度条显示
-- [ ] 成功/失败图标
-- [ ] --verbose 调试模式正常
-
-## 回滚机制验证
-- [ ] 安装失败时正确清理
-- [ ] Ctrl+C 中断时正确清理
+- [ ] Windows Server 安装正常
+- [ ] macOS 安装正常
