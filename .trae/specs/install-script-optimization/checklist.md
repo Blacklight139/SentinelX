@@ -2,6 +2,8 @@
 
 ## 脚本结构验证
 - [ ] install.sh 函数结构清晰，每个函数职责单一
+- [ ] install-windows.ps1 函数结构清晰（新增）
+- [ ] install-macos.sh 函数结构清晰（新增）
 - [ ] 支持 `--verbose` 调试模式
 - [ ] 支持 `--skip-confirmation` 非交互模式
 
@@ -29,7 +31,7 @@
 - [ ] 强制卸载（--force）正常工作
 - [ ] 保留数据卸载（--keep-data）正常工作
 
-## Docker 安装验证
+## Linux Docker 安装验证
 - [ ] Docker 未安装时自动安装
 - [ ] Docker 服务未运行时提示启动
 - [ ] docker-compose.yml 正确下载和配置
@@ -37,7 +39,7 @@
 - [ ] 容器启动后健康检查通过
 - [ ] 访问 https://localhost:8443/api/v1/health 返回 200
 
-## 二进制安装验证
+## Linux 二进制安装验证
 - [ ] 从 GitHub releases 下载正确版本
 - [ ] SHA256 校验通过
 - [ ] 密钥正确生成到 /etc/sentinelx/keys/
@@ -45,12 +47,32 @@
 - [ ] 服务启动后健康检查通过
 - [ ] 访问 https://localhost:8443/api/v1/health 返回 200
 
+## Windows Server 安装验证
+- [ ] PowerShell 5.1+ 可执行
+- [ ] Docker Desktop 检测正常
+- [ ] 端口占用检测正常
+- [ ] Docker 方式安装成功
+- [ ] 二进制方式安装成功并注册为 Windows Service
+- [ ] 服务启动后健康检查通过
+
+## macOS 安装验证
+- [ ] macOS 11+ 可执行
+- [ ] Homebrew 检测正常
+- [ ] Docker Desktop 检测正常
+- [ ] 端口占用检测正常
+- [ ] Docker 方式安装成功
+- [ ] 二进制方式安装成功并注册为 launchd agent
+- [ ] 服务启动后健康检查通过
+
 ## 在线安装脚本验证
 - [ ] online_install.sh 包含所有优化
 - [ ] 可通过 curl 远程执行
 - [ ] Go 1.25 安装支持正常
 
-## 兼容性验证
-- [ ] Ubuntu/Debian 系统安装正常
+## 多平台兼容性验证
+- [ ] Ubuntu 系统安装正常
+- [ ] Debian 系统安装正常
 - [ ] CentOS/RHEL 系统安装正常
 - [ ] Fedora 系统安装正常
+- [ ] Windows Server 安装正常
+- [ ] macOS 安装正常
