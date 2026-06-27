@@ -1,40 +1,98 @@
+# SentinelX 服务端配置文件示例
+# 路径: /etc/sentinelx/config.yaml
+
+# API 认证配置
+auth:
+  # API 访问 Token 列表，用于验证客户端身份
+  tokens:
+    - "sentinelx-admin-token-change-me"
+  # 允许的 IP 段（可选，暂不实现）
+  allowed_ips: []
+
+# 服务端配置
 server:
+  # 监听地址
   address: "0.0.0.0:8443"
+  # 日志目录
   log_dir: "/var/lib/sentinelx/meg"
+  # 数据目录
   data_dir: "/var/lib/sentinelx/data"
+  # 最大客户端连接数
   max_clients: 100
+  # 读取超时时间（秒）
+  read_timeout: 30
+  # 写入超时时间（秒）
+  write_timeout: 30
+  # 空闲超时时间（秒）
+  idle_timeout: 120
 
+# 安全配置
 security:
+  # RSA 密钥长度
   rsa_key_size: 2048
+  # 会话超时时间（秒）
   session_timeout: 3600
+  # 最大登录尝试次数
   max_login_attempts: 5
+  # 是否启用双向 TLS 认证
+  enable_mtls: false
 
+# 日志配置
 logging:
+  # 日志级别: debug, info, warn, error
   level: "info"
+  # 日志格式: json, text
+  format: "json"
+  # 日志轮转大小（MB）
   rotation_size: 100
+  # 日志保留天数
   retention_days: 30
 
+# 监控配置
 monitoring:
+  # 是否启用 Prometheus 指标
   enable_metrics: true
+  # 指标服务端口
   metrics_port: 9090
+  # 是否启用 pprof 性能分析
+  enable_pprof: false
+  # pprof 服务端口
+  pprof_port: 6060
 
+# FRP 监控配置
 frp_monitoring:
+  # 是否启用 FRP 监控
   enabled: true
+  # 监控的端口列表
   monitor_ports:
     - 7000
     - 7001
     - 8080
+  # 检测规则
   detection_rules:
     - name: "domain_hijacking"
       pattern: "Host:.*malicious"
       severity: "high"
+      description: "检测域名劫持攻击"
     - name: "traffic_redirection"
       pattern: "Location:.*unauthorized"
       severity: "medium"
+      description: "检测流量重定向"
 
-clients:
-  allowed_ips:
-    - "192.168.1.0/24"
-    - "10.0.0.0/8"
-  require_auth: true
-  auth_timeout: 300
+# 缓存配置
+cache:
+  # 是否启用缓存
+  enabled: true
+  # 缓存大小（MB）
+  size_mb: 100
+  # 缓存过期时间（秒）
+  ttl_seconds: 3600
+
+# 数据库配置（预留，暂未使用）
+database:
+  type: "sqlite"
+  host: "localhost"
+  port: 5432
+  name: "sentinelx"
+  user: "sentinelx"
+  password: ""
