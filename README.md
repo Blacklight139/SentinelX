@@ -6,7 +6,6 @@ SentinelX - 安全流量监控与日志系统
   <img src="https://img.shields.io/github/actions/workflow/status/Blacklight139/SentinelX/go.yml?style=for-the-badge&label=CI/CD" alt="CI/CD">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/github/stars/Blacklight139/SentinelX?style=for-the-badge&logo=github" alt="GitHub Stars">
-  <img src="https://img.shields.io/gitee/stars/dark-beam/SentinelX?style=for-the-badge&logo=gitee" alt="Gitee Stars">
 </p><div align="center">
   <h1>SentinelX - 企业级安全流量监控系统</h1>
   <p>实时检测中间商恶意操控，保护您的FRP流量安全</p>English | 中文 | 文档
