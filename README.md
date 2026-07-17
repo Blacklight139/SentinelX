@@ -1,5 +1,3 @@
-SentinelX - 安全流量监控与日志系统（重制版）
-
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.25.5-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
   <img src="https://img.shields.io/badge/License-AGPL%203.0-green?style=for-the-badge" alt="License">
@@ -7,8 +5,10 @@ SentinelX - 安全流量监控与日志系统（重制版）
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/github/stars/Blacklight139/SentinelX?style=for-the-badge&logo=github" alt="GitHub Stars">
 </p><div align="center">
-  <h1>SentinelX - 企业级安全流量监控系统</h1>
+  <h1>SentinelX - 企业级安全流量监控系统(重制版)</h1>
   <p>实时检测中间商恶意操控，保护您的FRP流量安全</p>English | 中文 | 文档
+
+  * 本项目开始重新编写架构代码阶段
 
 </div>📍 双仓库同步
 
