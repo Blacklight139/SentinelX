@@ -24,38 +24,6 @@
 🌍 GitHub https://github.com/Blacklight139/SentinelX 国际用户、海外用户 完整的CI/CD、自动发布、多平台构建
 🇨🇳 Gitee https://gitee.com/dark-beam/SentinelX 中国大陆用户 国内镜像、加速下载、中文社区
 
-🚀 快速开始
-
-一键安装（推荐）
-
-中国大陆用户（使用 Gitee 镜像）
-
-```bash
-curl -sSL https://gitee.com/dark-beam/SentinelX/raw/main/install.sh | sudo bash
-```
-
-国际用户（使用 GitHub）
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Blacklight139/SentinelX/main/install.sh | sudo bash
-```
-
-Docker 快速部署
-
-```bash
-# 使用 GitHub Docker Hub
-docker run -d \
-  --name sentinelx \
-  -p 8443:8443 \
-  -p 9090:9090 \
-  ghcr.io/blacklight139/sentinelx:latest
-
-# 或者使用 Docker Compose
-git clone https://github.com/Blacklight139/SentinelX.git
-cd SentinelX
-docker-compose up -d
-```
-
 ✨ 核心特性
 
 🔒 安全监控
