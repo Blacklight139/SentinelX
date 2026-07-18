@@ -1,7 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.25.5-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
   <img src="https://img.shields.io/badge/License-AGPL%203.0-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/github/actions/workflow/status/Blacklight139/SentinelX/go.yml?style=for-the-badge&label=CI/CD" alt="CI/CD">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/github/stars/Blacklight139/SentinelX?style=for-the-badge&logo=github" alt="GitHub Stars">
 </p><div align="center">
